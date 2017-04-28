@@ -7,6 +7,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -18,46 +19,80 @@ import org.apache.hadoop.util.GenericOptionsParser;
 
 public class Question0_0 {
 
+    /**
+     *
+     * @author nadjik
+     *
+     */
     public static class MyMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
+
+        Counter comptLigneVide;
+
         @Override
-        public void map(final LongWritable cle, final Text valeur, final Context context)
+        protected void map(final LongWritable key, final Text value, final Context context)
                 throws IOException, InterruptedException {
 
-            String line = valeur.toString();
-
-            // Suppression de l'espace
-            String[] words = line.split(" ");
-
-            // Parcour de l'ensemble des mots
-            for (String word : words) {
-                Text cleDeSorti = new Text(word.toUpperCase().trim());
-                IntWritable valeurDeSorti = new IntWritable(1);
-                context.write(cleDeSorti, valeurDeSorti);
+            /*
+             * for (String word : value.toString().split("\\s+")) {
+             * context.write(new Text(word), new IntWritable(1));
+             * }
+             */
+            if (value.toString().isEmpty()) {
+                this.comptLigneVide.increment(1);
             }
+            for (String word : value.toString().split("\\")) {
+                context.write(new Text(word), new IntWritable(1));
+            }
+
+        }
+
+        @Override
+        protected void cleanup(final Mapper<LongWritable, Text, Text, IntWritable>.Context context)
+                throws IOException, InterruptedException {
+            // TODO Auto-generated method stub
+            super.cleanup(context);
+        }
+
+        @Override
+        protected void setup(final Mapper<LongWritable, Text, Text, IntWritable>.Context context)
+                throws IOException, InterruptedException {
+            super.setup(context);
+            this.comptLigneVide = context.getCounter(HadoopCpt.ligneVide);
         }
     }
 
+    /**
+     *
+     * @author nadjik
+     *
+     */
     public static class MyReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
         @Override
-        public void reduce(final Text mot, final Iterable<IntWritable> valeurs, final Context context)
+        protected void reduce(final Text key, final Iterable<IntWritable> values, final Context context)
                 throws IOException, InterruptedException {
 
-            int somme = 0;
-            for (IntWritable value : valeurs) {
-                somme += value.get();
+            int sum = 0;
+            for (IntWritable value : values) {
+                sum += value.get();
             }
-            context.write(mot, new IntWritable(somme));
+            context.write(key, new IntWritable(sum));
+
         }
     }
 
+    /**
+     *
+     * @param args
+     * @throws Exception
+     */
     public static void main(final String[] args) throws Exception {
 
-        Configuration configuration = new Configuration();
-        String[] otherArgs = new GenericOptionsParser(configuration, args).getRemainingArgs();
+        Configuration conf = new Configuration();
+        String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
         String input = otherArgs[0];
         String output = otherArgs[1];
 
-        Job job = Job.getInstance(configuration, "question0_0");
+        Job job = Job.getInstance(conf, "Question0_0");
         job.setJarByClass(Question0_0.class);
 
         job.setMapperClass(MyMapper.class);
@@ -68,7 +103,10 @@ public class Question0_0 {
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
 
-        // Nombre de réducers utilisé
+        // 1.4 Job Combiner
+        // job.setCombinerClass(MyReducer.class);
+
+        // 1.5 Nombre de reducers
         job.setNumReduceTasks(3);
 
         FileInputFormat.addInputPath(job, new Path(input));
