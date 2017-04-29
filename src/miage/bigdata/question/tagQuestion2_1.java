@@ -18,6 +18,8 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 
+import com.google.common.collect.MinMaxPriorityQueue;
+
 import miage.bigdata.utils.Country;
 
 public class tagQuestion2_1 {
@@ -30,7 +32,8 @@ public class tagQuestion2_1 {
 	public static class MyMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
 
 		@Override
-		protected void map(final LongWritable key, final Text value, final Context context) throws IOException, InterruptedException {
+		protected void map(final LongWritable key, final Text value, final Context context)
+				throws IOException, InterruptedException {
 
 			// HashMap<String, String> hmap = new HashMap<String, String>();
 			String[] tagTable = value.toString().split("\t");
@@ -60,16 +63,16 @@ public class tagQuestion2_1 {
 		protected void reduce(final Text key, final Iterable<IntWritable> values, final Context context)
 				throws IOException, InterruptedException {
 
-			//HashMap<String, Integer> hmap = new HashMap<String, Integer>();
-			//String paysSplit;
-			//String tagSplit;
+			// HashMap<String, Integer> hmap = new HashMap<String, Integer>();
+			// String paysSplit;
+			// String tagSplit;
 			Integer sum = 0;
 			for (IntWritable value : values) {
 				sum += value.get();
 			}
-			//tagSplit = key.toString().split("-")[1];
-			//hmap.put(tagSplit, sum);
-			context.write(key , new IntWritable(sum));
+			// tagSplit = key.toString().split("-")[1];
+			// hmap.put(tagSplit, sum);
+			context.write(key, new IntWritable(sum));
 		}
 	}
 
@@ -78,28 +81,24 @@ public class tagQuestion2_1 {
 	 * @author nadjik
 	 *
 	 */
-	/*public static class MyMapper1 extends Mapper<Text, IntWritable, Text, StringAndInt> {
-
-		@Override
-		protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-
-			// HashMap<String, String> hmap = new HashMap<String, String>();
-			String[] tagTable = value.toString().split("\t");
-			String tag = java.net.URLDecoder.decode(tagTable[8], "UTF-8");
-			String altitude = tagTable[10];
-			String accuracy = tagTable[11];
-			String tagCodePays;
-			Country codePays = Country.getCountryAt(parseDouble(altitude), parseDouble(accuracy));
-			if (codePays == null) {
-				System.out.println("Le code n'existe pas");
-			} else {
-				for (String tagSend : tag.toString().split(",")) {
-					tagCodePays = codePays.toString().concat(",").concat(tagSend);
-					context.write(new Text(tagCodePays), new IntWritable(1));
-				}
-			}
-		}
-	}*/
+	/*
+	 * public static class MyMapper1 extends Mapper<Text, IntWritable, Text,
+	 * StringAndInt> {
+	 * 
+	 * @Override protected void map(LongWritable key, Text value, Context
+	 * context) throws IOException, InterruptedException {
+	 * 
+	 * // HashMap<String, String> hmap = new HashMap<String, String>(); String[]
+	 * tagTable = value.toString().split("\t"); String tag =
+	 * java.net.URLDecoder.decode(tagTable[8], "UTF-8"); String altitude =
+	 * tagTable[10]; String accuracy = tagTable[11]; String tagCodePays; Country
+	 * codePays = Country.getCountryAt(parseDouble(altitude),
+	 * parseDouble(accuracy)); if (codePays == null) { System.out.println(
+	 * "Le code n'existe pas"); } else { for (String tagSend :
+	 * tag.toString().split(",")) { tagCodePays =
+	 * codePays.toString().concat(",").concat(tagSend); context.write(new
+	 * Text(tagCodePays), new IntWritable(1)); } } } }
+	 */
 
 	/**
 	 *
@@ -107,13 +106,15 @@ public class tagQuestion2_1 {
 	 * @throws Exception
 	 */
 	public static void main(final String[] args) throws Exception {
+		
+		//MinMaxPriorityQueue<StringAndInt> minMax = new MinMaxPriorityQueue<StringAndInt>(null, 0);
 
 		Configuration conf = new Configuration();
 		String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 		String input = otherArgs[0];
 		String output = otherArgs[1];
 
-		Job job = Job.getInstance(conf, "Question0_0");
+		Job job = Job.getInstance(conf, "Question2_1");
 		job.setJarByClass(tagQuestion2_1.class);
 
 		job.setMapperClass(MyMapper.class);
@@ -126,7 +127,9 @@ public class tagQuestion2_1 {
 
 		// 1.4 Job Combiner // job.setCombinerClass(MyReducer.class);
 
-		// 1.5 Nombre de reducers job.setNumReduceTasks(3);
+		// 1.5 Nombre de reducers
+
+		job.setNumReduceTasks(3);
 
 		FileInputFormat.addInputPath(job, new Path(input));
 		job.setInputFormatClass(TextInputFormat.class);
