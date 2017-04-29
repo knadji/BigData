@@ -2,8 +2,15 @@ package miage.bigdata.question;
 public class StringAndInt implements Comparable<StringAndInt> {
 
     private String tag;
-    private double nbOccurTag;
+    private Integer nbOccurTag;
 
+    public StringAndInt(){};
+    
+    public StringAndInt(String tag, Integer nbOccur) {
+    	this.tag=tag;
+    	this.nbOccurTag=nbOccur;
+	}
+    
     @Override
     public int compareTo(final StringAndInt o) {
         if (this.nbOccurTag > o.nbOccurTag) {
@@ -18,5 +25,23 @@ public class StringAndInt implements Comparable<StringAndInt> {
     public String toString() {
         return "[tag=" + tag + ", nbOccurTag=" + nbOccurTag + "]";
     }
+
+	public String getTag() {
+		return tag;
+	}
+
+	public void setTag(String tag) {
+		this.tag = tag;
+	}
+
+	public Integer getNbOccurTag() {
+		return nbOccurTag;
+	}
+
+	public void setNbOccurTag(Integer nbOccurTag) {
+		this.nbOccurTag = nbOccurTag;
+	}
+    
+    
 
 }
