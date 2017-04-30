@@ -12,14 +12,9 @@ public class StringAndInt implements Comparable<StringAndInt> {
 	}
     
     @Override
-    public int compareTo(final StringAndInt o) {
-        if (this.nbOccurTag > o.nbOccurTag) {
-            return 1;
-        } else if (this.nbOccurTag < o.nbOccurTag) {
-            return -1;
-        }
-        return 0;
-    }
+	public int compareTo(StringAndInt o) {
+		return Integer.compare(o.nbOccurTag, this.nbOccurTag);
+	}
 
     @Override
     public String toString() {

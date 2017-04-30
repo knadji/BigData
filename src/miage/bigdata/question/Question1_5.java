@@ -57,7 +57,7 @@ public class Question1_5 {
         String input = otherArgs[0];
         String output = otherArgs[1];
 
-        Job job = Job.getInstance(configuration, "question0_0");
+        Job job = Job.getInstance(configuration, "question1_5");
         job.setJarByClass(Question1_5.class);
 
         job.setMapperClass(MyMapper.class);

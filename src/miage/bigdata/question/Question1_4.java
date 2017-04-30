@@ -16,6 +16,8 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 
+import miage.bigdata.question.Question1_4.MyReducer;
+
 public class Question1_4 {
 
     public static class MyMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
@@ -57,7 +59,7 @@ public class Question1_4 {
         String input = otherArgs[0];
         String output = otherArgs[1];
 
-        Job job = Job.getInstance(configuration, "question0_0");
+        Job job = Job.getInstance(configuration, "question1_4");
         job.setJarByClass(Question1_4.class);
 
         job.setMapperClass(MyMapper.class);
@@ -68,15 +70,12 @@ public class Question1_4 {
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
 
-        // Nombre de r�ducers utilis�
-        job.setNumReduceTasks(3);
-
         FileInputFormat.addInputPath(job, new Path(input));
         job.setInputFormatClass(TextInputFormat.class);
 
         FileOutputFormat.setOutputPath(job, new Path(output));
         job.setOutputFormatClass(TextOutputFormat.class);
-
+        job.setCombinerClass(MyReducer.class);
         System.exit(job.waitForCompletion(true) ? 0 : 1);
     }
 }

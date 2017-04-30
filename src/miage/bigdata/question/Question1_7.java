@@ -29,7 +29,7 @@ public class Question1_7 {
 			if (value.toString().isEmpty()) {
 				this.comptLigneVide.increment(1);
 			}
-			for (String word : value.toString().split("\\")) {
+			for (String word : value.toString().split(" ")) {
 				context.write(new Text(word), new IntWritable(1));
 			}
 		}
